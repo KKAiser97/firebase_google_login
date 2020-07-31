@@ -1,0 +1,61 @@
+import 'package:firebase_login/blocs/authentication_bloc.dart';
+import 'package:firebase_login/blocs/login_bloc.dart';
+import 'package:firebase_login/events/authentication_event.dart';
+import 'package:firebase_login/repository/user_repository.dart';
+import 'package:firebase_login/state/login_state.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:meta/meta.dart';
+
+class LoginScreen extends StatefulWidget {
+  final User _user;
+
+  const LoginScreen({Key key, @required User user})
+      : assert(user != null),
+        _user = user,
+        super(key: key);
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  LoginBloc _loginBloc;
+  User get _user => widget._user; //get _user from StatefulWidget LoginScreen
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _loginBloc = BlocProvider.of<LoginBloc>(context);
+    _emailController.addListener(() {});
+    _passwordController.addListener(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: BlocBuilder<LoginBloc, LoginState>(builder: (context, loginState) {
+        if (loginState.isFailure) {
+          print("Login failed");
+        } else if (loginState.isSubmitting) {
+          print("Logging in");
+        } else if (loginState.isSuccess) {
+          BlocProvider.of<AuthenticationBloc>(context)
+              .add(AuthenticationEventLoggedIn());
+        }
+        return Padding(
+          padding: EdgeInsets.all(20),
+          child: Form(
+              child: ListView(
+            children: <Widget>[
+              TextFormField(
+                controller: _emailController,
+              )
+            ],
+          )),
+        );
+      }),
+    );
+  }
+}
